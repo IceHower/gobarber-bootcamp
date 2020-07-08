@@ -1,35 +1,38 @@
 import { Router, Response, Request } from 'express'; // Importa o router, Response e request para definir os tipos do paramentro
-import {uuid} from 'uuidv4';
-import { startOfHour, parseISO, isEqual} from 'date-fns'; //Importa as funções startOfHour, parseISO e isEqual do date-fns
+import { startOfHour, parseISO } from 'date-fns'; //Importa as funções startOfHour, parseISO e isEqual do date-fns
+import AppointmentsRepository from '../repositories/AppointmentsRepository'; // importa o repositories
+import CreateAppointmentService from '../services/CreateAppointmentService';
 
 //A função parseISO vai converter uma string para o formato date do js
 //A funçao startOfHour vai pega o começo da hora de uma data
-interface Appointment  {
-    id: string,
-    provider: string,
-    date: Date,
-}
+
+//Rota deve ta preocupada em receber a requisição, chamar outro arquivo, devolver uma resposta.
+//Sempre que tiver algo alem disso, provalvemente devemos abstrair do arquivo de rotas.
 
 const appointmentsRouter = Router(); // define uma variavel para inicializar o router
-const appointments: Appointment[] = []; // define que a variavel e um array da interface de appointment
+const appointmentsRepository = new AppointmentsRepository(); //inicializa o AppointmentRepository.
+
+
+
 appointmentsRouter.post('/', (request : Request, response : Response) => { // Metodo get da rota appointments que retorna um Json
-    const { provider, date } = request.body; // Pega o nome do provider e a data do body da aplicação
-    const parsedDate = startOfHour(parseISO(date)); //pega a data transforma em Date do js e seta pra ser a hora exata.
-    const appointment = { // cria uma variavel pra armazenar os recebido do body
-        id: uuid(),
-        provider,
-        date: parsedDate
+    try {
+        const { provider, date } = request.body; // Pega o nome do provider e a data do body da aplicação.
+
+        const parsedDate = parseISO(date); //pega a data transforma em Date do js. // Aqui só transforma um dado.
+
+        const createAppointment = new CreateAppointmentService(appointmentsRepository); //Passa a instancia  do repository como parametro no constructor do service.
+        const appointment = createAppointment.execute({date: parsedDate, provider}); // Destruramos para passar o date e o provider e passamos como parametro no metodo execute do service.
+        return response.json(appointment); // retorna um json com as informações cadastradas
     }
-
-    const isDateUsed = appointments.find(appointement => isEqual(parsedDate, appointment.date)); //Percorre todo array e executa a comparação isEqual
-
-    if(isDateUsed) { //Se o isDateUsed for true ele retorna um erro.
-        return response.status(400).json({message: 'This appointment is already booked'});
+    catch (err) {
+        return response.status(400).json( { error: err.message });
     }
-
-    appointments.push(appointment); // inseri as informações dentro do array
-
-    return response.json(appointment); // retorna um json com as informações cadastradas
 })
+
+appointmentsRouter.get('/', (request: Request, response: Response) => { // Lista os itens cadastrados
+    const appointment = appointmentsRepository.list(); // inicializa uma variavel passando a função list do AppointmentsRepository.
+
+    return response.json(appointment); // retorna um json com o resultado obtido.
+});
 
 export default appointmentsRouter; // exporta a variavel
