@@ -1,6 +1,7 @@
 import Appointment from '../models/Appointment';
 import  { startOfHour } from 'date-fns';
 import AppointmentsRepository from '../repositories/AppointmentsRepository';
+import { getCustomRepository } from 'typeorm';
 
 /**
  * Recebimento das informações
@@ -9,33 +10,27 @@ import AppointmentsRepository from '../repositories/AppointmentsRepository';
  */
 
  interface RequestDTO { //DTO dos dados recebidos
-    provider: string,
+    provider_id: string,
     date: Date,
  }
 
 
 class CreateAppointmentService {
-    private appointmentsRepository: AppointmentsRepository; //Cria uma variavel privada para armazenar os dados recebidos do constructor.
-    //Passamos o nosso appointmentsRepository como parametro, e definimos o tipo dele como uma instancia da Classe de AppointmentsRepository
-    //quando desejamos que um parametro seja do tipo de uma instancia de uma classe utilizamos esse formato
-    //Recebe todas dependencias através do constructor
-    constructor(appointmentsRepository: AppointmentsRepository) {
-        this.appointmentsRepository = appointmentsRepository; // Armazena os dados recebidos do constructor na variavel privada.
-
-    }
-    public execute({date, provider} : RequestDTO): Appointment {
+    public async execute({date, provider_id} : RequestDTO): Promise<Appointment> {
+        const appointmentsRepository = getCustomRepository(AppointmentsRepository); // definimos uma variavel que vai receber a função getCustomRepository passando o AppointmentsRepository.
         const appointmentDate = startOfHour(date); //Seta o agendademento de hora em hora. // Aqui é uma regra de negócio.
-        const appointmentsRepository = new AppointmentsRepository(); //Instancia a classe de AppointmentsRepository
 
-        const isDateUsed = this.appointmentsRepository.isUsed(appointmentDate); //Passa o parsedDate para a função isUsed no appointmentRepository.
+        const isDateUsed = await appointmentsRepository.isUsed(appointmentDate); //Passa o parsedDate para a função isUsed no appointmentRepository.
         if(isDateUsed) { //Se o isDateUsed retornar um objeto ele da um throw em um erro.
          throw Error('This appointment is already booked');
         }
 
-         const appointment = this.appointmentsRepository.create({
-         provider,
+         const appointment = appointmentsRepository.create({ // O metodo create só cria uma instancia no banco de dados, mas não salva.
+         provider_id,
          date: appointmentDate
         }); //Usa o metodo create da appointmentsRepository passando o provider e a parsedDate.
+
+        await appointmentsRepository.save(appointment); // Salva o registro appointment no banco de dados.
 
         return appointment;
     }

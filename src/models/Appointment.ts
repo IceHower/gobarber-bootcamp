@@ -1,20 +1,34 @@
-import { uuid } from 'uuidv4'; // importamos a função uuid do uuidv4
+
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm' // Entity no ORM é quando algo vai ser salvo no banco de dados, no caso um model
 //Criamos a classe Appointment para dividirmos as responsabilidades, aqui ela recebera tudo que for relacionado aos cadastro de Appointments
+import User from './User'
+// Colocando esse @Entity('appointments') em cima da classe, basicamente é como se passassemos a classe como parametro para o decorator
+// Significa que toda instancia de Appointment, será feita na tabela appointments no banco de dados.
+@Entity('appointments')
 class Appointment {
-    //Definimos o tipos das variaves que o constructor ira receber
+
+    @PrimaryGeneratedColumn('uuid') // Define que é uma chave primaria, que é gerada automaticamente usando o metodo uuid.
     id: string;
+    @Column() // define que é uma coluna normal que por padrão se não especificar o tipo, ele irá usar varchar(string).
+    provider_id: string;
+    
+    @ManyToOne(() => User) // Define oq deve retornar, e classificamos Como Muitos Para Um
+    @JoinColumn({name: 'provider_id'})
+    provider : User;
 
-    provider: string;
-
+    @Column('time with time zone')
     date: Date;
-    //Desestruturamos os parametros para ter uma melhor vizualização
-    // O Omit serve para definir o tipos do parametro e qual variavel se deseja omitir deste tipo
-    //EX: Omit<TipoDoParametro, 'variavel que se deseja omitir'>
-    constructor({provider, date} : Omit<Appointment, 'id'>) { //Criamos um constructor para definir quais sao os parametros obrigatorios
-        this.id = uuid(); //chama a função uuid para dar um id de forma estática.
-        this.provider = provider;
-        this.date = date;
-    }
+    @CreateDateColumn()
+    created_at: Date;
+    @UpdateDateColumn()
+    updated_at: Date;
 }
 
 export default Appointment
+
+/**
+ * Tipos de Relacionamento
+ * Um para Um (one to one)
+ * Um para Muitos (one to many)
+ * Muitos para Muitos(many to many)
+ */
