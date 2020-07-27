@@ -15,6 +15,9 @@ class User {
     @Column()
     password: string;
 
+    @Column()
+    avatar: string;
+
     @CreateDateColumn() //Já são decorators especializados nos campos de auditoria na criação e updated.
     created_at: Date;
 

@@ -2,11 +2,14 @@ import multer from 'multer'; // importa o multer
 import path from 'path'; // importa o path do node.js
 import crypto from 'crypto'; // importa o crypto para usarmos o metodo randombytes do node.js
 
-export default {
 
+const tempFolder = path.resolve(__dirname, '..', '..', 'temp'); // caminho aonde vamos salvar as profile pictures.
+
+export default {
+    directory: tempFolder, // Adicionamos esse campo, para facilitar pegar o caminho aonde as profile pictures vao ficar salvas
     storage: multer.diskStorage({
         // define o destino da pasta dos arquivos || __dirname pega o caminho inteiro do computador ate a pasta config
-        destination: path.resolve(__dirname, '..', '..', 'temp'),
+        destination: tempFolder,
         // define o nome do arquivo, gera um hash de 10 bytes e transforma em string hexdecimal
         // depois junta o hash com o nome original do arquivo que estava no pc do usuario
         // isso é para que seja dificil ocorrer duplicação.

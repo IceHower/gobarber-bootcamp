@@ -2,6 +2,7 @@ import Appointment from '../models/Appointment';
 import  { startOfHour } from 'date-fns';
 import AppointmentsRepository from '../repositories/AppointmentsRepository';
 import { getCustomRepository } from 'typeorm';
+import AppError from '../errors/AppError';
 
 /**
  * Recebimento das informações
@@ -22,7 +23,7 @@ class CreateAppointmentService {
 
         const isDateUsed = await appointmentsRepository.isUsed(appointmentDate); //Passa o parsedDate para a função isUsed no appointmentRepository.
         if(isDateUsed) { //Se o isDateUsed retornar um objeto ele da um throw em um erro.
-         throw Error('This appointment is already booked');
+         throw new AppError('This appointment is already booked');
         }
 
          const appointment = appointmentsRepository.create({ // O metodo create só cria uma instancia no banco de dados, mas não salva.

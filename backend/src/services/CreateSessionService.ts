@@ -3,6 +3,7 @@ import User from '../models/User';
 import { compare } from 'bcryptjs'; // importa o metodo compare.
 import { sign } from 'jsonwebtoken';
 import authConfig from '../config/auth';
+import AppError from '../errors/AppError';
 
 interface Request {
     email: string,
@@ -17,14 +18,14 @@ class CreateSessionService {
         }); // procura um usuario que bate com o email que ele está recebendo.
 
         if(!user) {
-            throw new Error('Incorret email/password combination.');
+            throw new AppError('Incorret email/password combination.', 401);
         }
         // vai comparar a senha recebida com a criptografada dentro do banco de dados
         // Retorna true, caso a comparação seja valida.
         const passwordMatch = await compare(password, user.password);
 
         if(!passwordMatch) {
-            throw new Error('Incorret email/password combination.');
+            throw new AppError('Incorret email/password combination.', 401);
         }
 
         //Passou até aqui usuario autenticado :)

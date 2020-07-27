@@ -17,7 +17,7 @@ const appointmentsRouter = Router(); // define uma variavel para inicializar o r
 appointmentsRouter.use(ensureAuthenticated) // Aplica o middleware em todas as rotas de appointments.
 
 appointmentsRouter.post('/', async (request : Request, response : Response) => { // Metodo post da rota appointments que retorna um Json
-    try {
+
         const { provider_id, date } = request.body; // Pega o nome do provider e a data do body da aplicação.
 
         const parsedDate = parseISO(date); //pega a data transforma em Date do js. // Aqui só transforma um dado.
@@ -25,11 +25,9 @@ appointmentsRouter.post('/', async (request : Request, response : Response) => {
         const createAppointment = new CreateAppointmentService(); //Passa a instancia  do repository como parametro no constructor do service.
         const appointment = await createAppointment.execute({date: parsedDate, provider_id}); // Destruramos para passar o date e o provider e passamos como parametro no metodo execute do service.
         return response.json(appointment); // retorna um json com as informações cadastradas
-    }
-    catch (err) {
-        return response.status(400).json( { error: err.message });
-    }
-})
+
+
+});
 
 appointmentsRouter.get('/', async (request: Request, response: Response) => { // Lista os itens cadastrados
     const appointmentsRepository = getCustomRepository(AppointmentsRepository); // definimos uma variavel que vai receber a função getCustomRepository passando o AppointmentsRepository.

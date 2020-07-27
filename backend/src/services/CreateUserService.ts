@@ -1,6 +1,7 @@
 import User from '../models/User';
 import { getRepository } from 'typeorm';
 import { hash } from 'bcryptjs'; // importamos a função hash
+import AppError from '../errors/AppError';
 
 interface Request {
     name: string,
@@ -17,7 +18,7 @@ class CreateUserService {
        });
 
        if(checkUserExists) {
-           throw new Error('Email addres already used.'); // vai "jogar" um erro.
+           throw new AppError('Email addres already used.'); // vai "jogar" um erro.
        }
        // Criamos uma variavel, que ira receber o metodo hash(senha, salt(numero ou uma string))
        // O salt é como se fosse como a criptografia sera feita, definindo um numero ele gerara uma automaticamente baseada na quantidade do numero
