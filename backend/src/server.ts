@@ -5,9 +5,11 @@ import './database'; //como nao a nenhum export no arquivo de database, pode se 
 import 'reflect-metadata';
 import uploadConfig from './config/upload';
 import AppError from './errors/AppError';
+import cors from 'cors'; // Importa cors
 
 
-const app = express(); // define uma variavel para inicializar o express
+const app = express(); // define uma variavel para inicializar o express.
+app.use(cors()); // Permite acessar api atraves da interface web.
 app.use(express.json()); // faz com que possa ler os dados vindo por json.
 app.use(routes); // define o .use na variavel routes
 // Fizemos uma rota de forma statica passando os nomes do arquivos que estao na pasta temp
