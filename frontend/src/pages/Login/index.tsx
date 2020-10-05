@@ -1,6 +1,6 @@
 import React, {useRef, useCallback} from 'react';
 import { Container, Content, Background } from './styles';
-import { FiLogIn, FiArrowRight, FiMail, FiLock } from 'react-icons/fi';
+import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
 import Button from '../../Components/button';
 import Input from '../../Components/input'
 import {Form} from  '@unform/web';
@@ -9,12 +9,19 @@ import * as Yup from 'yup';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { FormHandles } from '@unform/core';
 import { Link, useHistory } from 'react-router-dom';
+import {useAuth} from '../../hooks/AuthContext';
+
+interface SignInFormData {
+    email: string;
+    password: string;
+}
 
 const Login: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
     const history = useHistory();
+    const {user, signIn} = useAuth();
 
-    const handleSubmit = useCallback(async (data: object) => {
+    const handleSubmit = useCallback(async (data: SignInFormData) => {
         try {
             formRef.current?.setErrors({});
             const schema = Yup.object().shape({
@@ -24,13 +31,17 @@ const Login: React.FC = () => {
             await schema.validate(data, {
                 abortEarly: false,
             });
-            history.push('/dashboard');
+            //history.push('/dashboard');
             console.log(data);
+            signIn({
+                email: data.email,
+                password: data.password,
+            });
         } catch(err) {
             const errors = getValidationErrors(err);
             formRef.current?.setErrors(errors);
         }
-    }, []);
+    }, [signIn]);
     
 return (
     <Container>
